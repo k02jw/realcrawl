@@ -1,7 +1,7 @@
 const axios = require('axios');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const {classifyText}  =  require('./notitlellm.js');
+const {classifyText}  =  require('./llm.js');
 
 async function detailsite(link) {
     const response = await axios.get(link, {
@@ -45,6 +45,7 @@ async function crawl_club(num) {
             const data = await detailsite(`https://www.campuspick.com${href}`);
             result.push(data);
             checker.add(href);
+            //링크 중복 제거  
         }
         if (i == num)
         {

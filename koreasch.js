@@ -12,7 +12,7 @@ const pool = new Pool({
 
 
 const API_KEY = 'p+NSi/0FEcz13gHVg+bgaW50z9w92LYW/cNFAA4OuGCF2fU6i8NNdBpHq2y1XjRmGTIGL5mO9OSkAC6mTqcyHQ==';  
-
+//한국장학재단 공공데이터 api 
 
 const url = 'https://api.odcloud.kr/api/15028252/v1/uddi:c7637c78-fbdd-481d-a59d-c6c12ce51a13';  
 //명세서 url
@@ -24,7 +24,6 @@ const params ={
 async function getScholarships() {
     try {
         const response = await axios.get(url, { params });
-        console.log('Scholarship Data:', response.data);
         return response.data.data;
     } catch (error) {
         console.error('Error fetching data:', error);
@@ -54,16 +53,16 @@ async function savePostToBenefits(post) {
         0,                    // owner_id (시스템 계정)
         false,                // private (공개)
         ['장학'],    // TEXT[] 배열
-        1,                    // channel_id
+        0,                    // channel_id
         post.image || null,
-        post.link || null,
+        post['홈페이지주소'] || null,
         null,                 // latitude
-        post['홈페이지주소']                // longitude
+        null             // longitude
     ];
   
     try {
       await pool.query(query, values);
-      console.log(`✅ 저장됨: ${post.title}`);
+      console.log(`✅ 저장됨: ${post['운영기관명']}`);
     } catch (err) {
       console.error(`❌ 저장 오류: ${post.title}`, err.message);
     }
@@ -76,9 +75,9 @@ async function saveAllPosts(posts) {
     }
 }
 
-async function crawl() {
+async function krcrawl() {
     const data = await getScholarships();
     await saveAllPosts(data);
 }
 
-crawl();
+module.exports = { krcrawl };

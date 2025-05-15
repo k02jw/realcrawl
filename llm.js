@@ -1,7 +1,8 @@
 require('dotenv').config(); 
 const axios = require('axios');
 
-async function classifyText(rawdata, title, link) {
+//llm
+async function classifyText(rawdata, link) {
     const prompt = `
   다음은 게시물 내용입니다:
 
@@ -17,10 +18,10 @@ async function classifyText(rawdata, title, link) {
 [교육, 공모, 경제, 문화, 미디어, 건강, 환경, 창업, 음식, 과학, 행사, 뷰티, 쇼핑, 인턴, 대회, 카페, 여행, 마케팅]  
 ※ 아래 카테고리 목록 외의 단어는 절대 사용하지 마세요. 예: "운동", "체육", "채용" 등은 허용되지 않습니다.
 - 카테고리는 항상 배열로 반환하세요.
-- do not use emoji.
+-이모티콘은 제거하세요.
 
 2. 각 항목의 출력 규칙:
-- 'title': 그대로 유지 ("""${title}""")
+- 'title': 게시물 제목
 - 'description': 대상자, 자격, 요약 등 중요 정보 한 줄 요약
 - 'start_date': 시작일 (YYYY-MM-DD) — 없다면 오늘 날짜로 대체
 - 'end_date': 종료일 (YYYY-MM-DD) — '상시모집' 같은 표현은 "9999-12-31"로 고정  
@@ -49,7 +50,7 @@ async function classifyText(rawdata, title, link) {
         messages: [
             { role: 'user', content: prompt}
         ],
-        temperature: 0.2             // 응답 끝을 정의할 토큰 (선택 사항)
+        temperature: 0.3               // 응답 끝을 정의할 토큰 (선택 사항)
       },
       {
         headers: {
@@ -69,6 +70,7 @@ async function classifyText(rawdata, title, link) {
       "체육": "건강",
       "채용": "인턴"
     };
+    //부정확한 카테고리 필터링
     let rawContent = response.data.choices[0].message.content;
 
     rawContent = rawContent.replace(/```json\s*([\s\S]*?)\s*```/, '$1').replace(/```([\s\S]*?)```/, '$1');
@@ -82,17 +84,17 @@ async function classifyText(rawdata, title, link) {
         throw e;
     }
 
-    // 카테고리 유효성 처리
+    // 카테고리 필터터
     if (Array.isArray(parsed.categories)) {
         parsed.categories = parsed.categories
             .map(cat => synonymMap[cat] || cat) // 유사어 치환
             .filter(cat => validCategories.includes(cat)); // 허용된 항목만 유지
 
         if (parsed.categories.length === 0) {
-            parsed.categories = ["교육"]; // 기본 
+            parsed.categories = ["교육"]; // 기본값
         }
     } else {
-        parsed.categories = ["교육"];
+        parsed.categories = ["교육"]; //기본값  
     }
 
     return parsed;

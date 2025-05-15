@@ -20,12 +20,12 @@ async function fetchsite() {
 
 async function detailsite(link) {
     const response = await axios.get(link);
-    const title = $('section h1').text();
     const $ = cheerio.load(response.data);
+    const title = $('section h1').text();
     const rawtext = $('.activity-detail-content').text();
     const cleantext = rawtext.replace(/<[^>]*>/g, '');
     const cleanedtext = cleantext.replace(/\s+/g, ' ').trim();
-    const result = await classifyText(cleanedtext, title, link);
+    const result = await classifyText(cleanedtext, link);
     return result;
 }
 

@@ -13,7 +13,7 @@ const pool = new Pool({
 // 저장 함수
 async function savePostToBenefits(post) {
     const query = `
-      I NSERT INTO benefits (
+      INSERT INTO benefits (
             title, start_date, end_date, description,
             owner_id, private, categories, channel_id,
             image, link, latitude, longitude
@@ -26,6 +26,7 @@ async function savePostToBenefits(post) {
         ON CONFLICT (link) DO NOTHING;
     `;
     const startDate = post.start_date || new Date().toISOString().split('T')[0];
+    //시작 날짜를 제공하지 않는다면 데이터를 받은 날부터 시작 
     const values = [
         post.title,
         startDate,
@@ -34,7 +35,7 @@ async function savePostToBenefits(post) {
         0,                    // owner_id (시스템 계정)
         false,                // private (공개)
         post.categories,    // TEXT[] 배열
-        1,                    // channel_id
+        0,                    // channel_id
         post.image || null,
         post.link || null,
         null,                 // latitude
